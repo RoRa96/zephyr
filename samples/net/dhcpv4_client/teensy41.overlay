@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2020, Bernhard Kraemer
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/ {
+    aliases {
+      toggle = &toggle_gpio;
+      sw0 = &button0;
+    };
+
+    chosen {
+      zephyr,console = &cdc_acm_uart0;
+    };
+
+    app-gpios {
+      compatible = "gpio-keys";
+      toggle_gpio: toggle-gpio {
+        gpios = <&gpio1 21 GPIO_ACTIVE_HIGH>;
+        label = "Toggle Pin 41";
+      };
+      button0: button_0 {
+        gpios = < &gpio1 25 GPIO_ACTIVE_LOW >;
+        label = "Push button switch 0 at Pin 23";
+      };
+    };
+};
+
+&zephyr_udc0 {
+  cdc_acm_uart0: cdc_acm_uart0 {
+    compatible = "zephyr,cdc-acm-uart";
+    label = "CDC_ACM_0";
+  };
+};
+&enet_mdio{
+  status = "okay";
+};
+&lpuart6 {
+  status = "disabled";
+};
+
+&lpuart4 {
+  status = "okay";
+  current-speed = < 115200 >;
+};
+
+// &enet {
+//   status = "okay";
+// };
+
+// &enet2{
+//   status = "okay";
+// };
+
+&enet_mac {
+  status = "okay";
+	// pinctrl-0 = <&pinmux_enet>;
+	// pinctrl-names = "default";
+	// zephyr,random-mac-address;
+	// phy-connection-type = "rmii";
+	// phy-handle = <&phy>;
+};
+
+// &phy{
+//   status = "okay";
+
+// };
+
+&enet_mdio {
+	status = "okay";
+	pinctrl-0 = <&pinmux_enet>;
+	pinctrl-names = "default";
+	phy: phy@0 {
+		// compatible = "microchip,ksz8081";
+    compatible = "microchip,dp83825";
+		reg = <0>;
+		status = "okay";
+    // mc,reset-gpio = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+		// mc,interrupt-gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+		mc,interface-type = "rmii";
+	};
+};
+
+// &enet_mdio {
+// 	status = "okay";
+// 	pinctrl-0 = <&pinmux_enet_mdio>;
+// 	pinctrl-names = "default";
+// 	phy: phy@0 {
+// 		compatible = "microchip,ksz8081";
+// 		reg = <0>;
+// 		status = "okay";
+// 		mc,reset-gpio = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+// 		mc,interrupt-gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+// 		mc,interface-type = "rmii";
+// 	};
+// };

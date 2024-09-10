@@ -13,4 +13,8 @@ config BUILD_OUTPUT_HEX
 config DISK_DRIVER_SDMMC
 	default y if DISK_DRIVERS
 
+config PHY_DP83825
+	bool
+	default y
+
 endif # BOARD_TEENSY40 || BOARD_TEENSY41

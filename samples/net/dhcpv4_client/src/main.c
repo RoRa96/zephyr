@@ -19,8 +19,38 @@ LOG_MODULE_REGISTER(net_dhcpv4_client_sample, LOG_LEVEL_DBG);
 #include <zephyr/net/net_core.h>
 #include <zephyr/net/net_context.h>
 #include <zephyr/net/net_mgmt.h>
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/drivers/uart.h>
+#include <zephyr/console/console.h>
+#include <zephyr/device.h>
 
 #define DHCP_OPTION_NTP (42)
+
+BUILD_ASSERT(DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console), zephyr_cdc_acm_uart),
+	     "Console device is not ACM CDC UART device");
+
+#if defined(CONFIG_USB_DEVICE_STACK_NEXT)
+static struct usbd_contex *sample_usbd;
+
+
+static int enable_usb_device_next(void)
+{
+	int err;
+
+	sample_usbd = sample_usbd_init_device(NULL);
+	if (sample_usbd == NULL) {
+		return -ENODEV;
+	}
+
+	err = usbd_enable(sample_usbd);
+	if (err) {
+		return err;
+	}
+
+	return 0;
+}
+#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK_NEXT) */
+
 
 static uint8_t ntp_server[4];
 
@@ -85,8 +115,19 @@ static void option_handler(struct net_dhcpv4_option_callback *cb,
 
 int main(void)
 {
+	#if defined(CONFIG_USB_DEVICE_STACK_NEXT)
+	if (enable_usb_device_next()) {
+		return 0;
+	}
+#else
+	if (usb_enable(NULL)) {
+		return 0;
+	}
+#endif
+
 	LOG_INF("Run dhcpv4 client");
 
+	
 	net_mgmt_init_event_callback(&mgmt_cb, handler,
 				     NET_EVENT_IPV4_ADDR_ADD);
 	net_mgmt_add_event_callback(&mgmt_cb);
@@ -98,5 +139,4 @@ int main(void)
 	net_dhcpv4_add_option_callback(&dhcp_cb);
 
 	net_if_foreach(start_dhcpv4_client, NULL);
-	return 0;
 }
